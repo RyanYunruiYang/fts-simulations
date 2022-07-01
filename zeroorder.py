@@ -2,8 +2,13 @@ from twolinks import *
 import random,math
 
 def a(n): #objective function
-	# return -(3-n[0])**2 - (5-n[1])**2
-	return -sum([(i+1-n[i])**2 for i in range(len(n))])
+	if(n== [0 for i in range(len(n))]):
+		return 0
+	# #Independent
+	# return -sum([(i+1-n[i])**2 for i in range(len(n))])
+
+	perchannel = 1000/sum(n)
+	return sum([(i+1)*n[i]*perchannel for i in range(len(n))])
 
 def noise(): #generate noise. values from [-1,0,1].
 	p = 0.2
@@ -41,9 +46,9 @@ def realToIntVector(n,scale): #mapping vector of reals to vector of ints
 
 
 def simulate(alpha,k):
-	random.seed(10)
+	random.seed(1220)
 	n = [0 for i in range(k)]
-	iterations = 100
+	iterations = 50
 
 	total = [0 for i in range(k)]
 	ema = [0 for i in range(k)]
@@ -59,6 +64,7 @@ def simulate(alpha,k):
 			x = [i+noise() for i in n]
 			magn = mag(sub(x,n))
 
+		regret += a(x)
 		if(adam):
 			rate = a(x)-a(n)
 		if(momentum):
@@ -79,18 +85,20 @@ def simulate(alpha,k):
 		#TODO normalise with^
 
 		if(adam):
-			n = add(n,1000*scale(1/mag(ema2),ema)) 
+			n = add(n,1000*scale(1/mag(ema2),ema))
 		if(momentum):
-			n = add(n,ema) 
+			n = [min(max(x,10),50) for x in realToIntVector(add(x,ema),1)]
 
 
 		total = add(total,n)
 		regret += a(n)
+		print(n)
 	print("average choice:")
 	print(scale(1/iterations,total))
 	print('avg regret:')
-	print(regret/iterations)
-	return (regret/iterations)
+	print(regret/(2*iterations))
+	print(2*iterations)
+	return (regret/(2*iterations))
 
 def searchOptimal(k):
 	maxim = float('-inf')
@@ -105,16 +113,16 @@ def searchOptimal(k):
 
 	print("optimal: " + str(maxalpha))
 def main():
-	maxk = 20
-	vals = [0 for i in range(maxk)]
-	for k in range(1,maxk):
-		vals[k] = searchOptimal(k)
-	print(vals)
+	# maxk = 20
+	# vals = [0 for i in range(maxk)]
+	# for k in range(1,maxk):
+	# 	vals[k] = searchOptimal(k)
+	# print(vals)
 
-	# simulate(0.5,10)
+	simulate(0.1,10)
 
 if __name__ == "__main__":
-	main()	
+	main()
 #[0, 0.95, 0.95, 0.7, 0.4, 0.9, 0.55, 0.4, 0.85, 0.7, 0.75, 0.55, 0.35, 0.4, 0.05, 0.3, 0.15, 0.65, 0.6, 0.8]
 
 	#20: 0.85
@@ -122,4 +130,3 @@ if __name__ == "__main__":
 	#30: 0.35
 	#40: 0.25
 	#50: 0.25
-
