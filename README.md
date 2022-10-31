@@ -1,1 +1,1 @@
-lol
+This repo is meant to analyze and find places for improvement in the FTS Optimizer Method (Lines 114 to 152 of https://github.com/cern-fts/fts3/blob/v3.11.2/src/server/services/optimizer/OptimizerConnections.cpp)
